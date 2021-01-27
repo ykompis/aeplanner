@@ -539,12 +539,12 @@ void AEPlanner::publishEvaluatedNodesRecursive(RRTNode* node)
   }
 }
 
-void AEPlanner::agentPoseCallback(const geometry_msgs::PoseStamped& msg)
+void AEPlanner::agentPoseCallback(const geometry_msgs::Pose& msg)
 {
-  current_state_[0] = msg.pose.position.x;
-  current_state_[1] = msg.pose.position.y;
-  current_state_[2] = msg.pose.position.z;
-  current_state_[3] = tf2::getYaw(msg.pose.orientation);
+  current_state_[0] = msg.position.x;
+  current_state_[1] = msg.position.y;
+  current_state_[2] = msg.position.z;
+  current_state_[3] = tf2::getYaw(msg.orientation);
 
   current_state_initialized_ = true;
 }

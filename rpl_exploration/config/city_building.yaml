@@ -1,0 +1,4 @@
+# Config for City Building experiment
+
+boundary/min: [-10, -11.0, -0.1]
+boundary/max: [11.0, 10.0, 12.0]

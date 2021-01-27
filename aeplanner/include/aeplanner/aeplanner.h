@@ -108,7 +108,7 @@ public:
   void execute(const aeplanner::aeplannerGoalConstPtr& goal);
 
   void octomapCallback(const octomap_msgs::Octomap& msg);
-  void agentPoseCallback(const geometry_msgs::PoseStamped& msg);
+  void agentPoseCallback(const geometry_msgs::Pose& msg);
 };
 
 }  // namespace aeplanner

@@ -2,7 +2,7 @@
 import rospy
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Pose
 
 from pigain.msg import Node
 from pigain.srv import Query, QueryResponse
@@ -27,7 +27,7 @@ class PIGain:
         self.resolution      = rospy.get_param('~visualize/resolution',   1)
 
         self.gain_sub = rospy.Subscriber('gain_node', Node, self.gain_callback)
-        self.pose_sub = rospy.Subscriber('pose', PoseStamped, self.pose_callback)
+        self.pose_sub = rospy.Subscriber('pose', Pose, self.pose_callback)
         self.marker_pub = rospy.Publisher('pig_markers', MarkerArray, queue_size=10)
         self.mean_pub = rospy.Publisher('mean_markers', MarkerArray, queue_size=10)
         self.sigma_pub = rospy.Publisher('sigma_markers', MarkerArray, queue_size=10)
@@ -37,7 +37,7 @@ class PIGain:
         if self.visualize_mean or self.visualize_sigma:
             rospy.Timer(rospy.Duration(5), self.evaluate)
 
-        # Get environment boundaries 
+        # Get environment boundaries
         try:
             self.min = rospy.get_param('boundary/min')
             self.max = rospy.get_param('boundary/max')
@@ -71,9 +71,9 @@ class PIGain:
 
     """ Save current pose of agent """
     def pose_callback(self, msg):
-        self.x = msg.pose.position.x
-        self.y = msg.pose.position.y
-        self.z = msg.pose.position.z
+        self.x = msg.position.x
+        self.y = msg.position.y
+        self.z = msg.position.z
 
     """ Reevaluate gain in all cached nodes that are closer to agent than self.range """
     def reevaluate_timer_callback(self, event):
@@ -83,7 +83,7 @@ class PIGain:
             rospy.logwarn("Make sure that 'pose' has been correctly mapped and that it is being published")
             return
 
-        bbx = (self.x-self.range, self.y-self.range, self.z-self.range, 
+        bbx = (self.x-self.range, self.y-self.range, self.z-self.range,
                self.x+self.range, self.y+self.range, self.z+self.range)
 
         hits = self.idx.intersection(bbx, objects=True)
@@ -116,7 +116,7 @@ class PIGain:
 
     """ Handle query to Gaussian Process """
     def query_server(self, req):
-        bbx = (req.point.x-2, req.point.y-2, req.point.z-2, 
+        bbx = (req.point.x-2, req.point.y-2, req.point.z-2,
                req.point.x+2, req.point.y+2, req.point.z+2)
         y = np.empty((0))
         x = np.empty((0,3))
@@ -189,7 +189,7 @@ class PIGain:
         for id, pts in enumerate(zip(xstar, mean, sigma)):
             mean_markers.markers.append(self.np_array_to_marker(id, pts[0], pts[1], max(1-pts[2], 0)))
             # sigma_markers.markers.append(self.np_array_to_marker(id, pts[0], pts[2] * 2))
-        
+
         self.mean_pub.publish(mean_markers)
         self.sigma_pub.publish(sigma_markers)
 
@@ -199,7 +199,7 @@ class PIGain:
         hits = self.idx.intersection(self.bbx, objects=True)
         for item in hits:
             markers.markers.append(self.node_to_marker(item.id, item.object))
-        
+
         self.marker_pub.publish(markers)
 
 
@@ -213,7 +213,7 @@ class PIGain:
         marker.scale.y = self.resolution
         marker.scale.z = 0.1
         marker.color.r = v / 72.0
-        marker.color.g = 0 
+        marker.color.g = 0
         marker.color.b = 0.5
         marker.color.a = a
         marker.pose.orientation.w = 1.0

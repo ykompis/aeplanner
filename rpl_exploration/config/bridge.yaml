@@ -1,0 +1,4 @@
+# Config for Bridge experiment
+
+boundary/min: [-23, -6.0, 6.0]
+boundary/max: [23.0, 6.0, 20.0]

@@ -30,9 +30,7 @@ int main(int argc, char** argv)
   logfile.open(path + "/data/logfile.csv");
   pathfile.open(path + "/data/path.csv");
 
-  ros::Publisher pub(nh.advertise<geometry_msgs::PoseStamped>("/mavros/"
-                                                              "setpoint_position/"
-                                                              "local",
+  ros::Publisher pub(nh.advertise<geometry_msgs::PoseStamped>("/firefly/command/pose",
                                                               1000));
 
   ros::ServiceClient coverage_srv =
@@ -58,18 +56,20 @@ int main(int argc, char** argv)
   ROS_INFO("rrt Action server started!");
 
   // Get current pose
-  geometry_msgs::PoseStamped::ConstPtr init_pose =
-      ros::topic::waitForMessage<geometry_msgs::PoseStamped>("/mavros/"
-                                                             "local_position/pose");
-  double init_yaw = tf2::getYaw(init_pose->pose.orientation);
+  geometry_msgs::Pose::ConstPtr init_pose =
+      ros::topic::waitForMessage<geometry_msgs::Pose>("/firefly/ground_truth/pose");
+  double init_yaw = tf2::getYaw(init_pose->orientation);
   // Up 2 meters and then forward one meter
   double initial_positions[8][4] = {
-    { init_pose->pose.position.x, init_pose->pose.position.y,
-      init_pose->pose.position.z + 2.0, init_yaw },
-    { init_pose->pose.position.x + 1.0 * std::cos(init_yaw),
-      init_pose->pose.position.y + 1.0 * std::sin(init_yaw),
-      init_pose->pose.position.z + 2.0, init_yaw },
+    { init_pose->position.x, init_pose->position.y,
+      init_pose->position.z + 2.0, init_yaw },
+    { init_pose->position.x + 1.0 * std::cos(init_yaw),
+      init_pose->position.y + 1.0 * std::sin(init_yaw),
+      init_pose->position.z + 2.0, init_yaw },
   };
+
+  // wait for logging to setup
+  ros::Duration(15).sleep();
 
   // This is the initialization motion, necessary that the known free space
   // allows the planning of initial paths.
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     aeplanner::aeplannerGoal aep_goal;
     aep_goal.header.stamp = ros::Time::now();
     aep_goal.header.seq = iteration;
-    aep_goal.header.frame_id = "map";
+    aep_goal.header.frame_id = "world";
     aep_goal.actions_taken = actions_taken;
     aep_ac.sendGoal(aep_goal);
 
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
     {
       rrtplanner::rrtGoal rrt_goal;
       rrt_goal.start.header.stamp = ros::Time::now();
-      rrt_goal.start.header.frame_id = "map";
+      rrt_goal.start.header.frame_id = "world";
       rrt_goal.start.pose = last_pose.pose;
       if (!aep_ac.getResult()->frontiers.poses.size())
       {
@@ -186,7 +186,7 @@ int main(int argc, char** argv)
                     "Flying: "          << fly_time << " " <<
                     "Tree size: "       << aep_ac.getResult()->tree_size);
 
-    logfile << iteration << ", " 
+    logfile << iteration << ", "
             << elapsed << ", "
             << aep_ac.getResult()->sampling_time.data << ", "
             << aep_ac.getResult()->planning_time.data << ", "

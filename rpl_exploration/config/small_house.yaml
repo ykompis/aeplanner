@@ -1,0 +1,4 @@
+# Config for Small House experiment
+
+boundary/min: [-6.0, -11.0, 0.0]
+boundary/max: [ 6.0,  9.0, 8.0]

@@ -1,0 +1,4 @@
+# Config for Temple experiment
+
+boundary/min: [-10.0, -20.0, 0.0]
+boundary/max: [10.0, 10.0, 14.0]

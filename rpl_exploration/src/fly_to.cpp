@@ -20,7 +20,7 @@ namespace rpl_exploration {
         ROS_INFO("Starting fly to server");
         as_.start();
       }
-      void execute(const rpl_exploration::FlyToGoalConstPtr& goal, 
+      void execute(const rpl_exploration::FlyToGoalConstPtr& goal,
                    actionlib::SimpleActionServer<rpl_exploration::FlyToAction> * as)
       {
         ROS_INFO_STREAM("Got new goal: Fly to (" << goal->pose.pose.position.x << ", "
@@ -52,17 +52,17 @@ namespace rpl_exploration {
           ROS_INFO_STREAM("Publishing goal to (" << p.x << ", " << p.y << ", " << p.z << ") ");
           pub_.publish(goal->pose);
 
-          listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(10.0) );
-          listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
+          listener.waitForTransform("/world", "/firefly/base_link", ros::Time(0), ros::Duration(10.0) );
+          listener.lookupTransform("/world", "/firefly/base_link", ros::Time(0), transform);
 
           geometry_msgs::Point q;
-          q.x = (float)transform.getOrigin().x(); 
-          q.y = (float)transform.getOrigin().y(); 
+          q.x = (float)transform.getOrigin().x();
+          q.y = (float)transform.getOrigin().y();
           q.z = (float)transform.getOrigin().z();
 
           geometry_msgs::Quaternion tq;
-          tq.x = (float)transform.getRotation().x(); 
-          tq.y = (float)transform.getRotation().y(); 
+          tq.x = (float)transform.getRotation().x();
+          tq.y = (float)transform.getRotation().y();
           tq.z = (float)transform.getRotation().z();
           tq.w = (float)transform.getRotation().w();
           tf::Quaternion cq( tq.x, tq.y, tq.z, tq.w);
@@ -71,7 +71,7 @@ namespace rpl_exploration {
           m.getRPY(roll, pitch, current_yaw);
 
           ROS_INFO_STREAM("Current position: (" << q.x << ", " << q.y << ", " << q.z << ") ");
-          geometry_msgs::Point d; 
+          geometry_msgs::Point d;
           d.x = p.x - q.x;
           d.y = p.y - q.y;
           d.z = p.z - q.z;

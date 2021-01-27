@@ -1,0 +1,4 @@
+# Config for Runcie Court Gate experiment
+
+boundary/min: [5.0, -17.0, 0.0]
+boundary/max: [17.0, 10.0, 11.0]

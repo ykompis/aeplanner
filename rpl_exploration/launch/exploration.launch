@@ -2,9 +2,41 @@
 <launch>
   <arg name="param_file" default="$(find rpl_exploration)/config/exploration.yaml" />
 
+  <!--  Experiment evaluation arguments -->
+  <arg name="mav_name"   default="firefly"/>
+  <arg name="voxel_size" default="0.1"/>
+
+  <arg name="record_data" default="true"/>
+  <arg name="record_visualization" default="true"/>
+  <arg name="experiment" default="small_house"/>
+  <arg name="data_directory" default="/home/user/Documents/Data"/>
+  <arg name="data_frequency" default="30.0" />
+  <arg name="time_limit" default="30.0" />
+  <arg name="delay" default="5.0" />
+
+  <!--  Experiment arguments -->
+  <arg name="experiment_config" default="$(find rpl_exploration)/config/$(arg experiment).yaml"/>
+
+  <!-- VOXBLOX Node -->
+  <include file="$(find ar_planner)/launch/voxblox.launch">
+    <arg name="mav_name"   value="$(arg mav_name)"/>
+    <arg name="voxel_size" value="$(arg voxel_size)"/>
+  </include>
 
   <group ns="aeplanner">
     <node pkg="tf2_ros" type="static_transform_publisher" name="primesense_broadcaster" args="0.05 0 0.13 -1.57079633 0 -1.57079633 base_link camera_link" />
+
+    <!-- Experiment evaluation, data logger-->
+    <node name="eval_data_node" pkg="rpl_exploration" type="eval_data_node.py" output="screen" required="true">
+      <param name="ns_planner" value="/aeplanner" />
+      <param name="ns_voxblox" value="/firefly/voxblox_node" />
+      <param name="delay" value="$(arg delay)" />
+      <param name="startup_timeout" value="5.0" />
+      <param name="evaluate" value="$(arg record_data)" />
+      <param name="eval_directory" value="$(arg data_directory)" />
+      <param name="eval_frequency" value="$(arg data_frequency)" />
+      <param name="time_limit" value="$(arg time_limit)" />
+    </node>
 
     <include file="$(find aeplanner)/launch/aeplanner_nodelet.launch"/>
     <include file="$(find pigain)/launch/pig.launch"/>
@@ -14,18 +46,8 @@
 
     <node name="rpl_exploration" pkg="rpl_exploration" type="rpl_exploration" output="screen" />
     <rosparam command="load" file="$(arg param_file)" />
+    <rosparam command="load" file="$(arg experiment_config)"/>
+
   </group>
 
-  <!-- Nodelet manager for camera-->
-  <node pkg="nodelet" type="nodelet" args="manager"
-name="camera_manager" output="screen"/>
-
-  <node pkg="nodelet" type="nodelet" name="image_to_points" args="load depth_image_proc/point_cloud_xyz camera_manager --no-bond">
-    <remap from="camera_info" to="/camera/depth/camera_info" />
-    <remap from="image_rect" to="/camera/depth/image_raw2" />
-    <remap from="points" to="/camera/depth/points2" />
-    <param name="queue_size" value="100" />
-  </node>
-
-  <node pkg="rpl_exploration" type="image_maxing.py" name="image_maxing" />
 </launch>

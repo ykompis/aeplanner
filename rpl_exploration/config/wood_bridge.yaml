@@ -1,0 +1,4 @@
+# Config for Wood Bridge experiment
+
+boundary/min: [-6.0, -29.0, 0.0]
+boundary/max: [12.0, 18.0, 7.0]
