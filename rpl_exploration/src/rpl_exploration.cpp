@@ -69,7 +69,7 @@ int main(int argc, char** argv)
   };
 
   // wait for logging to setup
-  ros::Duration(15).sleep();
+  ros::Duration(2).sleep();
 
   // This is the initialization motion, necessary that the known free space
   // allows the planning of initial paths.
