@@ -1,0 +1,4 @@
+# Config for Church experiment
+
+boundary/min: [-30.0, -15.0, -0.1]
+boundary/max: [20.0, 15.0, 23.0]

@@ -1,0 +1,4 @@
+# Config for Powerplant experiment
+
+boundary/min: [-40.0, 9.0, 0.0]
+boundary/max: [-7.0, 40.0, 26.0]
